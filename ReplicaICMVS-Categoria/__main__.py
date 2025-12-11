@@ -170,7 +170,6 @@ def main():
     logger.info("Iniciando Proceso Por Lotes - ReplicaICMVS-Categoria")
 
     root = os.path.join("root", "Publication", "ReplicaICMVS")
-    # root = r"C:\Users\cjuarez\Desktop\TAREAS PYTHON\ReplicaICMVS-Categoria"
 
     query = '''
         SELECT "PERNR"
@@ -228,15 +227,64 @@ def main():
             logger.info("No existen registros.")
         elif rows_count > limit:
             df = get_data_query(query=query, model=model)
+
+            columnas_2_decimales = ["ANZHL", "BETRG"]
+
+            columna_entera = "ZINFOTIPO"
+
             count_archivos = 1
+
             for offset in range(0, rows_count, limit):
                 logger.info(f"Generando archivo, lote No.{count_archivos}")
-                pd.DataFrame(df.iloc[offset:offset + limit]).to_csv(f"{root}/ReplicaICMVS-Categoria-{count_archivos}.txt", index=False, sep=';')
+
+                # Tomar el fragmento y copiarlo para modificarlo de manera segura
+                df_temp = df.iloc[offset:offset + limit].copy()
+
+                # Aplicar formato de 2 decimales solo a las columnas indicadas
+                for col in columnas_2_decimales:
+                    if col in df_temp.columns:
+                        df_temp[col] = df_temp[col].astype(float).round(2)
+
+                # Formatear columna entera (ZINFOTIPO)
+                if columna_entera in df_temp.columns:
+                    df_temp[columna_entera] = df_temp[columna_entera].astype(float).astype(int)
+
+                # Exportar el archivo con formato decimal 2 cifras
+                df_temp.to_csv(
+                    f"{root}/ReplicaICMVS-Categoria-{count_archivos}.txt",
+                    index=False,
+                    sep=';',
+                    float_format="%.2f"
+                )
+
                 count_archivos += 1
         else:
             logger.info(f"Generando archivo, lote No.1")
             df = get_data_query(query=query, model=model)
-            df.to_csv(f'{root}/ReplicaICMVS-Categoria-1.txt', index=False, sep=';')
+
+            columnas_2_decimales = ["ANZHL", "BETRG"]
+
+            columna_entera = "ZINFOTIPO"
+
+            # Copia segura
+            df_temp = df.copy()
+
+            # Aplicar formato de 2 decimales solo a las columnas indicadas
+            for col in columnas_2_decimales:
+                if col in df_temp.columns:
+                    df_temp[col] = df_temp[col].astype(float).round(2)
+
+            # Formatear columna entera (ZINFOTIPO)
+            if columna_entera in df_temp.columns:
+                df_temp[columna_entera] = df_temp[columna_entera].astype(float).astype(int)
+
+            # Exportar archivo con dos decimales
+            df_temp.to_csv(
+                f'{root}/ReplicaICMVS-Categoria-1.txt',
+                index=False,
+                sep=';',
+                float_format="%.2f"
+            )
 
     except Exception as ex:
         logger.error(f"Error: {ex}")

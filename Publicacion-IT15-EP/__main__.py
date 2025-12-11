@@ -1,4 +1,4 @@
-import os, json, time, logging, sys, glob
+import os, json, time, logging, sys
 
 def agregarpath(libreria):
     # Construir la ruta completa del archivo o directorio 'libreria'
@@ -166,27 +166,10 @@ def get_data_query(query, limit=99999999, chunk_size=100000, model='femcodev', e
     return df
 
 
-def limpieza_directorio(root, nombre):
-    pattern = os.path.join(root, f"*{nombre}*.csv")
-
-    # Obtener lista de archivos que coincidan
-    files_to_delete = glob.glob(pattern)
-
-    if not files_to_delete:
-        logger.info(f"No se encontraron archivos ({nombre}) para borrar.")
-    else:
-        for file_path in files_to_delete:
-            try:
-                os.remove(file_path)
-                logger.info(f"Archivo eliminado: {file_path}")
-            except Exception as e:
-                logger.info(f"Error al eliminar {file_path}: {e}")
-
 def main():
     logger.info("Iniciando Proceso Por Lotes")
 
     root = os.path.join("root", "Publication", "ReplicaICMEP")
-    # root = r'C:\Users\cjuarez\Desktop\TAREAS PYTHON\Publicacion-IT15-EP\ArchivosPruebas'
 
     query = '''
         SELECT 
@@ -225,12 +208,10 @@ def main():
                                  ORDER BY "PERNR"
     '''
 
-    model = 'femcoepdev' # ----------------------------------------------------------------
+    model = 'femcoepqa'
     limit = 10000
 
     try:
-
-        limpieza_directorio(root, "ReplicaICMEP")
 
         rows_count = int(get_data_query(f'''
             SELECT COUNT(*) FROM (
@@ -266,7 +247,7 @@ def main():
 
                 # Exportar con dos decimales
                 df_temp.to_csv(
-                    f"{root}/ReplicaICMEP-{count_archivos}.csv",
+                    f"{root}/ReplicaICMEP-{count_archivos}.txt",
                     index=False,
                     sep=';',
                     float_format="%.2f"
@@ -294,7 +275,7 @@ def main():
 
             # Exportar con formato de dos decimales
             df_temp.to_csv(
-                f'{root}/ReplicaICMEP-1.csv',
+                f'{root}/ReplicaICMEP-1.txt',
                 index=False,
                 sep=';',
                 float_format="%.2f"
