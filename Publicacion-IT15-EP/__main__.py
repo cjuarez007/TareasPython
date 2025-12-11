@@ -1,5 +1,6 @@
 import os, json, time, logging, sys
 
+
 def agregarpath(libreria):
     # Construir la ruta completa del archivo o directorio 'libreria'
     ruta_libreria = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), libreria)
@@ -80,7 +81,6 @@ def hacer_solicitud(url, headers, data=None, intentos=3, timeout=600):
     # Si fallan todos los intentos, lanzamos una excepción
     logger.error(f"Falló la solicitud tras {intentos} intentos.")
     raise Exception(f"Falló la solicitud tras {intentos} intentos.")
-
 
 
 def get_data_query(query, limit=99999999, chunk_size=100000, model='femcodev', eff=True):
@@ -169,7 +169,7 @@ def get_data_query(query, limit=99999999, chunk_size=100000, model='femcodev', e
 def main():
     logger.info("Iniciando Proceso Por Lotes")
 
-    root = os.path.join("root", "Publication", "ReplicaICMEP")
+    root = os.path.join("root", "Data", "SAP")
 
     query = '''
         SELECT 
@@ -204,12 +204,13 @@ def main():
                                 FROM "ReplicaICMEP"
                                 WHERE "ZSTAT" = 'N'
                               )
+                                AND "ZSTAT" = 'N' 
                                  )
                                  ORDER BY "PERNR"
     '''
 
     model = 'femcoepqa'
-    limit = 10000
+    limit = 8000
 
     try:
 
@@ -247,7 +248,7 @@ def main():
 
                 # Exportar con dos decimales
                 df_temp.to_csv(
-                    f"{root}/ReplicaICMEP-{count_archivos}.txt",
+                    f"{root}/ReplicaICMEP-{count_archivos}.csv",
                     index=False,
                     sep=';',
                     float_format="%.2f"
@@ -275,7 +276,7 @@ def main():
 
             # Exportar con formato de dos decimales
             df_temp.to_csv(
-                f'{root}/ReplicaICMEP-1.txt',
+                f'{root}/ReplicaICMEP-1.csv',
                 index=False,
                 sep=';',
                 float_format="%.2f"
